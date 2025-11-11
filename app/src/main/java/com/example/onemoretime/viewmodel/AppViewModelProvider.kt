@@ -11,12 +11,12 @@ import com.example.onemoretime.OneMoreTimeApplication
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer para UsuarioViewModel
+        // Initializer para UsuarioViewModel (Registro)
         initializer {
             UsuarioViewModel(oneMoreTimeApplication().container.usuarioRepository)
         }
 
-        // Initializer para PostViewModel
+        // Initializer para PostViewModel (Home)
         initializer {
             PostViewModel(oneMoreTimeApplication().container.postRepository)
         }
@@ -28,10 +28,21 @@ object AppViewModelProvider {
 
         // Initializer para ProfileViewModel
         initializer {
-            ProfileViewModel(oneMoreTimeApplication().container.postRepository)
+            ProfileViewModel(
+                oneMoreTimeApplication().container.usuarioRepository,
+                oneMoreTimeApplication().container.postRepository
+            )
         }
 
-        // Puedes añadir más initializers para otros ViewModels aquí
+        // Initializer para CreatePostViewModel
+        initializer {
+            CreatePostViewModel(oneMoreTimeApplication().container.postRepository)
+        }
+
+        // Initializer para LoginViewModel
+        initializer {
+            LoginViewModel(oneMoreTimeApplication().container.usuarioRepository)
+        }
     }
 }
 

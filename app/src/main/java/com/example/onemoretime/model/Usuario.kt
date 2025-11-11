@@ -10,5 +10,8 @@ data class Usuario(
     val nombre: String,
     val correo: String,
     val clave: String, // Considera encriptar esto en una app real
-    val direccion: String
+    val direccion: String,
+    val karma: Int = 0,
+    val fechaRegistro: Long = System.currentTimeMillis(),
+    val avatarUrl: String? = null
 )

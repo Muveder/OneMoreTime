@@ -27,12 +27,12 @@ class CreatePostViewModel(private val postRepository: PostRepository) : ViewMode
     /**
      * Valida y guarda el post en la base de datos.
      */
-    suspend fun savePost(): Boolean {
-        if (!validateInput()) {
-            return false
+    fun savePost() {
+        if (validateInput()) {
+            viewModelScope.launch {
+                postRepository.insertPost(postUiState.toPost())
+            }
         }
-        postRepository.insertPost(postUiState.toPost())
-        return true
     }
 
     private fun validateInput(uiState: PostUiState = postUiState): Boolean {

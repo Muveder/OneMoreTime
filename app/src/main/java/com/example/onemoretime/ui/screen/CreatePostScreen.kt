@@ -1,22 +1,19 @@
 package com.example.onemoretime.ui.screen
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.onemoretime.viewmodel.AppViewModelProvider
 import com.example.onemoretime.viewmodel.CreatePostViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +21,6 @@ fun CreatePostScreen(
     navController: NavController,
     viewModel: CreatePostViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val postUiState = viewModel.postUiState
 
     Scaffold(
@@ -38,11 +34,8 @@ fun CreatePostScreen(
                 },
                 actions = {
                     Button(onClick = {
-                        coroutineScope.launch {
-                            if (viewModel.savePost()) {
-                                navController.popBackStack() // Volver a la pantalla anterior si se guarda
-                            }
-                        }
+                        viewModel.savePost()
+                        navController.popBackStack() // Volver a la pantalla anterior
                     }) {
                         Text("Publicar")
                     }
@@ -93,6 +86,21 @@ fun CreatePostScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f) // Para que ocupe el resto del espacio
+            )
+        }
+    }
+}
+
+// Suponiendo que tienes un Composable similar a este en algún lugar
+@Composable
+fun RatingInputBar(currentRating: Float, onRatingChanged: (Float) -> Unit) {
+    Row {
+        (1..5).forEach { star ->
+            Icon(
+                imageVector = Icons.Default.Star, 
+                contentDescription = null,
+                tint = if (star <= currentRating) Color.Yellow else Color.Gray,
+                modifier = Modifier.clickable { onRatingChanged(star.toFloat()) }.size(32.dp)
             )
         }
     }
