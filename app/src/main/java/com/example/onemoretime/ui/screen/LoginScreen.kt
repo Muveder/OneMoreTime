@@ -22,7 +22,6 @@ import androidx.navigation.NavController
 import com.example.onemoretime.R
 import com.example.onemoretime.viewmodel.AppViewModelProvider
 import com.example.onemoretime.viewmodel.LoginViewModel
-import com.example.onemoretime.viewmodel.SessionUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,11 +29,11 @@ fun LoginScreen(
     navController: NavController,
     loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val sessionState by loginViewModel.sessionState.collectAsState()
+    val loginSuccess by remember { derivedStateOf { loginViewModel.loginSuccess } }
 
     // Navega a home si el login es exitoso
-    LaunchedEffect(sessionState) {
-        if (sessionState is SessionUiState.LoggedIn) {
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess) {
             navController.navigate("home") {
                 // Limpia el backstack para que el usuario no pueda volver al login con el botón de atrás
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }

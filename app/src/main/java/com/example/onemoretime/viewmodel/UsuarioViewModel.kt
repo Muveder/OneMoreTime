@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Data class para el estado de la UI de la pantalla de registro
 data class RegistroUiState(
     val nombre: String = "",
     val correo: String = "",
@@ -28,19 +27,19 @@ class UsuarioViewModel(private val usuarioRepository: UsuarioRepository) : ViewM
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
     fun onNombreChange(nombre: String) {
-        _uiState.update { it.copy(nombre = nombre, errores = it.errores.copy(nombre = null)) }
+        _uiState.update { it.copy(nombre = nombre, errores = it.errores.copy(nombre = null, registro = null)) }
     }
 
     fun onCorreoChange(correo: String) {
-        _uiState.update { it.copy(correo = correo, errores = it.errores.copy(correo = null)) }
+        _uiState.update { it.copy(correo = correo, errores = it.errores.copy(correo = null, registro = null)) }
     }
 
     fun onClaveChange(clave: String) {
-        _uiState.update { it.copy(clave = clave, errores = it.errores.copy(clave = null)) }
+        _uiState.update { it.copy(clave = clave, errores = it.errores.copy(clave = null, registro = null)) }
     }
 
     fun onDireccionChange(direccion: String) {
-        _uiState.update { it.copy(direccion = direccion, errores = it.errores.copy(direccion = null)) }
+        _uiState.update { it.copy(direccion = direccion, errores = it.errores.copy(direccion = null, registro = null)) }
     }
 
     fun onAceptaTerminosChange(acepta: Boolean) {
@@ -77,8 +76,16 @@ class UsuarioViewModel(private val usuarioRepository: UsuarioRepository) : ViewM
                     clave = estadoActual.clave, // Recuerda encriptar esto en una app real
                     direccion = estadoActual.direccion
                 )
-                usuarioRepository.insertUsuario(nuevoUsuario)
-                _uiState.update { it.copy(registroExitoso = true) }
+                val resultado = usuarioRepository.insertUsuario(nuevoUsuario)
+                if (resultado == -1L) {
+                    // Falló la inserción, el usuario ya existe
+                    _uiState.update {
+                        it.copy(errores = it.errores.copy(registro = "El nombre o el correo ya están en uso."))
+                    }
+                } else {
+                    // Éxito
+                    _uiState.update { it.copy(registroExitoso = true) }
+                }
             }
         }
     }

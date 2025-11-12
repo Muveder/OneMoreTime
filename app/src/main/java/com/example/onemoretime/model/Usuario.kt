@@ -1,9 +1,14 @@
 package com.example.onemoretime.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "usuarios")
+@Entity(
+    tableName = "usuarios",
+    // Hacemos que el nombre y el correo sean únicos para evitar duplicados
+    indices = [Index(value = ["nombre"], unique = true), Index(value = ["correo"], unique = true)]
+)
 data class Usuario(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

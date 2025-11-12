@@ -17,12 +17,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.onemoretime.viewmodel.AppViewModelProvider
 import com.example.onemoretime.viewmodel.UsuarioViewModel
 
-@OptIn(ExperimentalMaterial3Api::class) // Anotación para API experimental
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(
     navController: NavController,
@@ -37,18 +35,16 @@ fun RegistroScreen(
         }
     }
 
-    // Colores para el gradiente
     val darkPurple = Color(0xFF4A0072)
     val lightPurple = Color(0xFFB57EDC)
 
-    // Colores para los TextFields
     val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(
         focusedTextColor = Color.White,
         unfocusedTextColor = Color.White,
         cursorColor = Color.White,
         unfocusedBorderColor = Color.White.copy(alpha = 0.7f),
         focusedBorderColor = Color.White,
-        containerColor = Color.Transparent, // Fondo del TextField
+        containerColor = Color.Transparent,
         errorBorderColor = MaterialTheme.colorScheme.error,
         focusedLabelColor = Color.White,
         unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
@@ -66,14 +62,13 @@ fun RegistroScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(32.dp)
-                .verticalScroll(rememberScrollState()), // Para que el formulario sea scrollable
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Crear una cuenta", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- Formulario ---
             OutlinedTextField(
                 value = uiState.nombre,
                 onValueChange = { usuarioViewModel.onNombreChange(it) },
@@ -139,13 +134,10 @@ fun RegistroScreen(
                 Text("Acepto los términos y condiciones", color = Color.White)
             }
 
-            if (!uiState.aceptaTerminos && uiState.errores.nombre != null) { // Lógica para mostrar error de términos
-                Text(
-                    text = "Debes aceptar los términos y condiciones",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+            // Mensaje de error general para el registro
+            uiState.errores.registro?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyLarge)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
