@@ -2,12 +2,11 @@ package com.example.onemoretime.data
 
 import android.content.Context
 
-/**
- * Un contenedor de dependencias simple para proporcionar los repositorios a la app.
- */
 interface AppContainer {
     val postRepository: PostRepository
     val usuarioRepository: UsuarioRepository
+    val voteRepository: VoteRepository
+    val commentRepository: CommentRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -17,5 +16,13 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val usuarioRepository: UsuarioRepository by lazy {
         OfflineUsuarioRepository(AppDatabase.getDatabase(context).usuarioDao())
+    }
+
+    override val voteRepository: VoteRepository by lazy {
+        OfflineVoteRepository(AppDatabase.getDatabase(context).voteDao())
+    }
+
+    override val commentRepository: CommentRepository by lazy {
+        OfflineCommentRepository(AppDatabase.getDatabase(context).commentDao())
     }
 }

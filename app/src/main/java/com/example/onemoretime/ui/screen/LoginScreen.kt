@@ -79,13 +79,13 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Campo de Correo
+            // Campo de Credencial (Nombre o Correo)
             OutlinedTextField(
-                value = loginViewModel.emailInput,
-                onValueChange = { loginViewModel.onEmailChange(it) },
-                label = { Text("Correo electrónico", color = Color.White.copy(alpha = 0.7f)) },
+                value = loginViewModel.credentialInput,
+                onValueChange = { loginViewModel.onCredentialChange(it) },
+                label = { Text("Correo o Nombre de Usuario", color = Color.White.copy(alpha = 0.7f)) },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 singleLine = true,
                 colors = textFieldColors
             )

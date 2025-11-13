@@ -1,6 +1,7 @@
 package com.example.onemoretime.viewmodel
 
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -11,22 +12,18 @@ import com.example.onemoretime.OneMoreTimeApplication
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer para UsuarioViewModel (Registro)
         initializer {
             UsuarioViewModel(oneMoreTimeApplication().container.usuarioRepository)
         }
 
-        // Initializer para PostViewModel (Home)
         initializer {
             PostViewModel(oneMoreTimeApplication().container.postRepository)
         }
 
-        // Initializer para ExploreViewModel
         initializer {
             ExploreViewModel(oneMoreTimeApplication().container.postRepository)
         }
 
-        // Initializer para ProfileViewModel
         initializer {
             ProfileViewModel(
                 oneMoreTimeApplication().container.usuarioRepository,
@@ -34,14 +31,22 @@ object AppViewModelProvider {
             )
         }
 
-        // Initializer para CreatePostViewModel
         initializer {
             CreatePostViewModel(oneMoreTimeApplication().container.postRepository)
         }
 
-        // Initializer para LoginViewModel
         initializer {
             LoginViewModel(oneMoreTimeApplication().container.usuarioRepository)
+        }
+
+        // Modificado para inyectar los tres repositorios
+        initializer {
+            PostDetailViewModel(
+                this.createSavedStateHandle(),
+                oneMoreTimeApplication().container.postRepository,
+                oneMoreTimeApplication().container.voteRepository,
+                oneMoreTimeApplication().container.commentRepository
+            )
         }
     }
 }

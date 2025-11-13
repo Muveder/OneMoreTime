@@ -3,17 +3,13 @@ package com.example.onemoretime.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import com.example.onemoretime.ui.screen.CreatePostScreen
-import com.example.onemoretime.ui.screen.ExploreScreen
-import com.example.onemoretime.ui.screen.HomeScreen
-import com.example.onemoretime.ui.screen.LoginScreen
-import com.example.onemoretime.ui.screen.ProfileScreen
-import com.example.onemoretime.ui.screen.RegistroScreen
-import com.example.onemoretime.ui.screen.ResumenScreen
+import com.example.onemoretime.ui.screen.*
 import com.example.onemoretime.viewmodel.AppViewModelProvider
 import com.example.onemoretime.viewmodel.UsuarioViewModel
 
@@ -25,7 +21,6 @@ fun AppNavigation() {
             LoginScreen(navController = navController)
         }
 
-        // Flujo de Registro Anidado
         navigation(startDestination = "register_screen", route = "register_flow") {
             composable("register_screen") { backStackEntry ->
                 val parentEntry = remember(backStackEntry) { navController.getBackStackEntry("register_flow") }
@@ -59,6 +54,14 @@ fun AppNavigation() {
 
         composable("profile") { 
             ProfileScreen(navController = navController)
+        }
+
+        // Nueva ruta para el detalle del post
+        composable(
+            route = "post_detail/{postId}",
+            arguments = listOf(navArgument("postId") { type = NavType.IntType })
+        ) {
+            PostDetailScreen(navController = navController)
         }
     }
 }

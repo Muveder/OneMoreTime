@@ -19,28 +19,25 @@ class CreatePostViewModel(private val postRepository: PostRepository) : ViewMode
         postUiState = newPostUiState.copy()
     }
 
-    fun savePost() {
-        // Obtenemos el usuario actual del SessionManager
+    fun savePost(): Boolean {
         val currentUser = SessionManager.currentUser.value
-        if (validateInput() && currentUser != null) {
-            viewModelScope.launch {
-                // Le pasamos el nombre del autor al crear el Post
-                postRepository.insertPost(postUiState.toPost(authorName = currentUser.nombre))
-            }
+        if (!validateInput() || currentUser == null) {
+            return false
         }
+
+        viewModelScope.launch {
+            postRepository.insertPost(postUiState.toPost(authorName = currentUser.nombre))
+        }
+        return true
     }
 
     private fun validateInput(uiState: PostUiState = postUiState): Boolean {
-        // La validación ya no necesita comprobar el autor
         return with(uiState) {
             title.isNotBlank() && community.isNotBlank()
         }
     }
 }
 
-/**
- * El estado de la UI ya no contiene al autor
- */
 data class PostUiState(
     val id: Int = 0,
     val title: String = "",
@@ -49,17 +46,15 @@ data class PostUiState(
     val rating: Float = 0.0f
 )
 
-/**
- * La función de extensión ahora requiere el nombre del autor
- */
+// Modificado para usar el nuevo campo 'score' en lugar de los contadores de emojis
 fun PostUiState.toPost(authorName: String): Post = Post(
     id = id,
     title = title,
     community = community,
-    author = authorName, // <-- ¡Aquí usamos el nombre del usuario logueado!
+    author = authorName,
     content = content,
     rating = rating,
-    timeAgo = "Just now", // Placeholder
-    upvotes = 0,
-    comments = 0
+    timeAgo = "Just now",
+    comments = 0,
+    score = 0 // Los posts nuevos empiezan con una puntuación de 0
 )

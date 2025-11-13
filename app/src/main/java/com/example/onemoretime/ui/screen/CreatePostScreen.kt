@@ -3,7 +3,7 @@ package com.example.onemoretime.ui.screen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -29,13 +29,15 @@ fun CreatePostScreen(
                 title = { Text("Crear Reseña") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {
                     Button(onClick = {
-                        viewModel.savePost()
-                        navController.popBackStack() // Volver a la pantalla anterior
+                        // La navegación solo ocurre si el guardado es exitoso
+                        if (viewModel.savePost()) {
+                            navController.popBackStack()
+                        }
                     }) {
                         Text("Publicar")
                     }
@@ -50,7 +52,6 @@ fun CreatePostScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Campo para el Título
             OutlinedTextField(
                 value = postUiState.title,
                 onValueChange = { viewModel.updateUiState(postUiState.copy(title = it)) },
@@ -58,15 +59,13 @@ fun CreatePostScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo para la Comunidad/Juego
             OutlinedTextField(
                 value = postUiState.community,
                 onValueChange = { viewModel.updateUiState(postUiState.copy(community = it)) },
                 label = { Text("Comunidad o Juego (ej: eldenring)") },
                 modifier = Modifier.fillMaxWidth()
             )
-            
-            // Selector de Estrellas para la Valoración
+
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Tu valoración:", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -78,26 +77,24 @@ fun CreatePostScreen(
                 )
             }
 
-            // Campo para el Contenido
             OutlinedTextField(
                 value = postUiState.content,
                 onValueChange = { viewModel.updateUiState(postUiState.copy(content = it)) },
                 label = { Text("Escribe tu reseña aquí...") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f) // Para que ocupe el resto del espacio
+                    .weight(1f)
             )
         }
     }
 }
 
-// Suponiendo que tienes un Composable similar a este en algún lugar
 @Composable
 fun RatingInputBar(currentRating: Float, onRatingChanged: (Float) -> Unit) {
     Row {
         (1..5).forEach { star ->
             Icon(
-                imageVector = Icons.Default.Star, 
+                imageVector = Icons.Default.Star,
                 contentDescription = null,
                 tint = if (star <= currentRating) Color.Yellow else Color.Gray,
                 modifier = Modifier.clickable { onRatingChanged(star.toFloat()) }.size(32.dp)

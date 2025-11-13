@@ -8,19 +8,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.SentimentVerySatisfied
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.onemoretime.R
 import com.example.onemoretime.model.Post
 
@@ -29,12 +29,12 @@ val onCardColor = Color.White
 val communityColor = Color(0xFFB57EDC)
 
 @Composable
-fun PostCard(post: Post, navController: androidx.navigation.NavController) {
+fun PostCard(post: Post, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = 8.dp)
-            .clickable { /* TODO: Navegar al detalle del post */ },
+            .clickable { navController.navigate("post_detail/${post.id}") },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor)
     ) {
@@ -57,32 +57,21 @@ fun PostCard(post: Post, navController: androidx.navigation.NavController) {
 
             Text(post.title, style = MaterialTheme.typography.titleLarge, color = onCardColor, fontWeight = FontWeight.Bold)
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            /*
-            post.image?.let {
-                Image(
-                    painter = painterResource(id = it),
-                    contentDescription = "Imagen del post",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            */
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Row {
-                    Icon(Icons.Default.ThumbUp, contentDescription = "Upvotes", tint = Color.Gray)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Reemplazamos los emojis por el nuevo 'score'
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.SentimentVerySatisfied, contentDescription = "Puntuación", tint = Color.Gray)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(post.upvotes.toString(), color = Color.Gray, fontSize = 14.sp)
+                    Text(post.score.toString(), color = Color.Gray, fontSize = 14.sp)
                 }
 
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Comment, contentDescription = "Comentarios", tint = Color.Gray)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("${post.comments} Comentarios", color = Color.Gray, fontSize = 14.sp)

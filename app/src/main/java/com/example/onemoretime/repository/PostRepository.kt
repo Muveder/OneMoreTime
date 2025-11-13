@@ -12,7 +12,6 @@ class PostRepository {
                 timeAgo = "4h",
                 title = "Mi reseña de Elden Ring: Una obra maestra",
                 content = "Después de 100 horas de juego, puedo decir que...",
-                upvotes = 123,
                 comments = 45,
                 rating = 5.0f
             ),
@@ -23,7 +22,6 @@ class PostRepository {
                 timeAgo = "1d",
                 title = "Cyberpunk 2077 con el parche 2.0 es otro juego",
                 content = "La redención de CD Projekt Red es real. Night City se siente más viva que nunca.",
-                upvotes = 88,
                 comments = 23,
                 rating = 4.5f
             ),
@@ -34,7 +32,6 @@ class PostRepository {
                 timeAgo = "2d",
                 title = "Enganchada a Stardew Valley otra vez",
                 content = "No importa cuántas veces lo juegue, siempre vuelvo a mi granja.",
-                upvotes = 250,
                 comments = 78,
                 rating = 5.0f
             )

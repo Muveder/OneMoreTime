@@ -4,10 +4,10 @@ import com.example.onemoretime.model.Usuario
 import kotlinx.coroutines.flow.Flow
 
 interface UsuarioRepository {
-    // Modificado para que devuelva el resultado de la inserción
     suspend fun insertUsuario(usuario: Usuario): Long
     fun getUsuarioPorNombreStream(nombre: String): Flow<Usuario>
     suspend fun getUsuarioPorCorreo(correo: String): Usuario?
+    suspend fun findUserByCredential(credential: String): Usuario?
 }
 
 class OfflineUsuarioRepository(private val usuarioDao: UsuarioDao) : UsuarioRepository {
@@ -21,5 +21,9 @@ class OfflineUsuarioRepository(private val usuarioDao: UsuarioDao) : UsuarioRepo
 
     override suspend fun getUsuarioPorCorreo(correo: String): Usuario? {
         return usuarioDao.getUsuarioPorCorreo(correo)
+    }
+
+    override suspend fun findUserByCredential(credential: String): Usuario? {
+        return usuarioDao.findUserByCredential(credential)
     }
 }
