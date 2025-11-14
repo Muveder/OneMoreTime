@@ -7,6 +7,7 @@ interface AppContainer {
     val usuarioRepository: UsuarioRepository
     val voteRepository: VoteRepository
     val commentRepository: CommentRepository
+    val commentVoteRepository: CommentVoteRepository // <-- Nuevo repositorio
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -24,5 +25,10 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val commentRepository: CommentRepository by lazy {
         OfflineCommentRepository(AppDatabase.getDatabase(context).commentDao())
+    }
+
+    // Implementación del nuevo repositorio
+    override val commentVoteRepository: CommentVoteRepository by lazy {
+        OfflineCommentVoteRepository(AppDatabase.getDatabase(context).commentVoteDao())
     }
 }

@@ -7,13 +7,13 @@ import androidx.room.PrimaryKey
 data class Post(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val author: String,
-    val community: String,
-    val timeAgo: String,
     val title: String,
-    val content: String? = null,
+    val community: String,
+    val author: String,
+    val content: String?,
     val rating: Float,
+    val timeAgo: String,
     val comments: Int,
-    // Nuevo sistema de votación
-    val score: Int = 0
+    val score: Int,
+    val imageUrl: String? = null // <-- Nuevo campo para la imagen
 )

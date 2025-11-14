@@ -8,6 +8,7 @@ interface UsuarioRepository {
     fun getUsuarioPorNombreStream(nombre: String): Flow<Usuario>
     suspend fun getUsuarioPorCorreo(correo: String): Usuario?
     suspend fun findUserByCredential(credential: String): Usuario?
+    suspend fun updateUsuario(usuario: Usuario) // <-- Nuevo método
 }
 
 class OfflineUsuarioRepository(private val usuarioDao: UsuarioDao) : UsuarioRepository {
@@ -25,5 +26,9 @@ class OfflineUsuarioRepository(private val usuarioDao: UsuarioDao) : UsuarioRepo
 
     override suspend fun findUserByCredential(credential: String): Usuario? {
         return usuarioDao.findUserByCredential(credential)
+    }
+
+    override suspend fun updateUsuario(usuario: Usuario) {
+        usuarioDao.update(usuario)
     }
 }

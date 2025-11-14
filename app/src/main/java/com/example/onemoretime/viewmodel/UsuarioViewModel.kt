@@ -2,12 +2,14 @@ package com.example.onemoretime.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.onemoretime.data.SessionManager
 import com.example.onemoretime.data.UsuarioRepository
 import com.example.onemoretime.model.Usuario
 import com.example.onemoretime.model.UsuarioErrores
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -76,15 +78,19 @@ class UsuarioViewModel(private val usuarioRepository: UsuarioRepository) : ViewM
                     clave = estadoActual.clave, // Recuerda encriptar esto en una app real
                     direccion = estadoActual.direccion
                 )
-                val resultado = usuarioRepository.insertUsuario(nuevoUsuario)
-                if (resultado == -1L) {
-                    // Falló la inserción, el usuario ya existe
+                
+                val resultadoId = usuarioRepository.insertUsuario(nuevoUsuario)
+                
+                if (resultadoId == -1L) {
                     _uiState.update {
                         it.copy(errores = it.errores.copy(registro = "El nombre o el correo ya están en uso."))
                     }
                 } else {
-                    // Éxito
-                    _uiState.update { it.copy(registroExitoso = true) }
+                    val usuarioLogueado = usuarioRepository.getUsuarioPorNombreStream(nuevoUsuario.nombre).first()
+                    if (usuarioLogueado != null) {
+                        SessionManager.login(usuarioLogueado)
+                        _uiState.update { it.copy(registroExitoso = true) }
+                    }
                 }
             }
         }

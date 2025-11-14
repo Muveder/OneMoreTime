@@ -1,99 +1,54 @@
 package com.example.onemoretime.ui.screen
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Comment
-import androidx.compose.material.icons.filled.SentimentVerySatisfied
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.onemoretime.R
 import com.example.onemoretime.model.Post
-
-val cardBackgroundColor = Color(0xFF2C003E)
-val onCardColor = Color.White
-val communityColor = Color(0xFFB57EDC)
 
 @Composable
 fun PostCard(post: Post, navController: NavController) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            .clickable { navController.navigate("post_detail/${post.id}") },
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBackgroundColor)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Avatar del autor",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("r/${post.community}", color = communityColor, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text(" • posteado por ${post.author} • ${post.timeAgo}", color = Color.Gray, fontSize = 12.sp)
-            }
+    var visible by remember { mutableStateOf(false) }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(post.title, style = MaterialTheme.typography.titleLarge, color = onCardColor, fontWeight = FontWeight.Bold)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Reemplazamos los emojis por el nuevo 'score'
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.SentimentVerySatisfied, contentDescription = "Puntuación", tint = Color.Gray)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(post.score.toString(), color = Color.Gray, fontSize = 14.sp)
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Comment, contentDescription = "Comentarios", tint = Color.Gray)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("${post.comments} Comentarios", color = Color.Gray, fontSize = 14.sp)
-                }
-
-                StarRating(rating = post.rating)
-            }
-        }
+    LaunchedEffect(key1 = post.id) {
+        visible = true
     }
-}
 
-@Composable
-fun StarRating(rating: Float) {
-    Row {
-        for (i in 1..5) {
-            val starColor = if (i <= rating) Color(0xFFFFD700) else Color.Gray
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = null,
-                tint = starColor,
-                modifier = Modifier.size(18.dp)
-            )
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(durationMillis = 500)) + 
+                slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(durationMillis = 500)),
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .clickable { navController.navigate("post_detail/${post.id}") },
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = post.title, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "en ${post.community} por ${post.author}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("⭐".repeat(post.rating.toInt()))
+            }
         }
     }
 }

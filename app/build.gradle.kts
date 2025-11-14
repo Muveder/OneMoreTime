@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // Arreglo Final y Definitivo: Aplicar el plugin SIN versión. La versión se hereda del build.gradle.kts raíz.
     id("org.jetbrains.kotlin.plugin.compose")
     id("kotlin-kapt")
 }
@@ -40,7 +39,6 @@ android {
     }
 }
 
-// Dependencias limpiadas y declaradas explícitamente
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -57,6 +55,9 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
+
+    // Añadimos la dependencia de Coil
+    implementation(libs.coil.compose)
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -1,24 +1,26 @@
 package com.example.onemoretime.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.onemoretime.data.PostRepository
 import com.example.onemoretime.model.Post
-import com.example.onemoretime.repository.PostRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-class HomeViewModel : ViewModel() {
+// Estado de la UI para la pantalla Home
+data class HomeUiState(val posts: List<Post> = emptyList())
 
-    private val _posts = MutableStateFlow<List<Post>>(emptyList())
-    val posts: StateFlow<List<Post>> = _posts.asStateFlow()
+class HomeViewModel(postRepository: PostRepository) : ViewModel() {
 
-    private val repository = PostRepository()
-
-    init {
-        loadPosts()
-    }
-
-    private fun loadPosts() {
-        _posts.value = repository.getPosts()
-    }
+    // El estado de la UI que la vista observará
+    val uiState: StateFlow<HomeUiState> =
+        postRepository.getAllPostsStream()
+            .map { posts -> HomeUiState(posts = posts) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000L),
+                initialValue = HomeUiState()
+            )
 }

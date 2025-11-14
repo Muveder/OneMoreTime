@@ -56,12 +56,20 @@ fun AppNavigation() {
             ProfileScreen(navController = navController)
         }
 
-        // Nueva ruta para el detalle del post
         composable(
             route = "post_detail/{postId}",
             arguments = listOf(navArgument("postId") { type = NavType.IntType })
         ) {
             PostDetailScreen(navController = navController)
+        }
+
+        composable("search") {
+            SearchScreen(navController = navController)
+        }
+
+        // Nueva ruta para la pantalla de configuración
+        composable("settings") {
+            SettingsScreen(navController = navController)
         }
     }
 }

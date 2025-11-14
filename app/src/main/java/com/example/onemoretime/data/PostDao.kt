@@ -23,10 +23,13 @@ interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPost(post: Post)
 
+    // CORREGIDO: La función ahora devuelve un Flow<Post?> para manejar casos donde el post no existe.
     @Query("SELECT * FROM posts WHERE id = :postId")
-    fun getPostById(postId: Int): Flow<Post>
+    fun getPostById(postId: Int): Flow<Post?>
 
-    // Nueva función para actualizar un post (para las reacciones)
     @Update
     suspend fun updatePost(post: Post)
+
+    @Query("SELECT * FROM posts WHERE title LIKE '%' || :query || '%' ORDER BY id DESC")
+    fun searchPosts(query: String): Flow<List<Post>>
 }

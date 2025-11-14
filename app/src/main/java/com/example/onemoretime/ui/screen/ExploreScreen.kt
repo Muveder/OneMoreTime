@@ -1,19 +1,10 @@
 package com.example.onemoretime.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,10 +12,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.onemoretime.viewmodel.AppViewModelProvider
+import com.example.onemoretime.viewmodel.ExploreTab
 import com.example.onemoretime.viewmodel.ExploreViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,57 +26,47 @@ fun ExploreScreen(
     exploreViewModel: ExploreViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val uiState by exploreViewModel.uiState.collectAsState()
-    val posts = uiState.postList
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Explorar", color = Color.White) }, // Título cambiado
+                title = { Text("Explorar", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = darkPurple),
                 actions = {
-                    IconButton(onClick = { /* TODO: Lógica de búsqueda */ }) {
+                    IconButton(onClick = { navController.navigate("search") }) {
                         Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.White)
                     }
                 }
             )
         },
         bottomBar = {
-            // Reutilizamos la misma barra de navegación que en HomeScreen
-            BottomAppBar(containerColor = darkPurple) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                    IconButton(onClick = {
-                        navController.navigate("home") { launchSingleTop = true }
-                    }) {
-                        Icon(Icons.Default.Home, contentDescription = "Home", tint = Color.White)
-                    }
-                    IconButton(onClick = {
-                        navController.navigate("explore") { launchSingleTop = true }
-                    }) {
-                        Icon(Icons.Default.Explore, contentDescription = "Explorar", tint = lightPurple) // Color activo
-                    }
-                    IconButton(onClick = {
-                        navController.navigate("create_post") { launchSingleTop = true }
-                    }) {
-                        Icon(Icons.Default.AddCircle, contentDescription = "Crear Post", tint = Color.White, modifier = Modifier.size(40.dp))
-                    }
-                    IconButton(onClick = {
-                        navController.navigate("profile") { launchSingleTop = true }
-                    }) {
-                        Icon(Icons.Default.Person, contentDescription = "Perfil", tint = Color.White)
-                    }
+            BottomNavBar(navController = navController, currentRoute = currentRoute)
+        }
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
+            val tabs = listOf("Top", "Nuevos")
+            TabRow(selectedTabIndex = uiState.selectedTab.ordinal, containerColor = darkPurple) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title, color = Color.White) },
+                        selected = uiState.selectedTab.ordinal == index,
+                        onClick = { exploreViewModel.selectTab(if (index == 0) ExploreTab.TOP else ExploreTab.NEW) }
+                    )
                 }
             }
-        },
-        containerColor = lightPurple.copy(alpha = 0.1f)
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 8.dp)
-        ) {
-            items(posts) { post ->
-                PostCard(post = post, navController = navController)
+
+            // Mostramos la lista correspondiente a la pestaña seleccionada
+            val postsToShow = when (uiState.selectedTab) {
+                ExploreTab.TOP -> uiState.topRatedPosts
+                ExploreTab.NEW -> uiState.newPosts
+            }
+
+            LazyColumn {
+                items(postsToShow) { post ->
+                    PostCard(post = post, navController = navController)
+                }
             }
         }
     }

@@ -10,9 +10,11 @@ interface PostRepository {
     fun getAllPostsStream(): Flow<List<Post>>
     fun getTopRatedPostsStream(): Flow<List<Post>>
     fun getPostsByAuthorStream(author: String): Flow<List<Post>>
-    fun getPostByIdStream(postId: Int): Flow<Post>
+    // CORREGIDO: Ahora puede devolver un Flow<Post?> para manejar posts no encontrados
+    fun getPostByIdStream(postId: Int): Flow<Post?>
     suspend fun insertPost(post: Post)
-    suspend fun updatePost(post: Post) // Nueva función para actualizar posts
+    suspend fun updatePost(post: Post)
+    fun searchPostsStream(query: String): Flow<List<Post>>
 }
 
 /**
@@ -25,7 +27,8 @@ class OfflinePostRepository(private val postDao: PostDao) : PostRepository {
 
     override fun getPostsByAuthorStream(author: String): Flow<List<Post>> = postDao.getPostsByAuthor(author)
 
-    override fun getPostByIdStream(postId: Int): Flow<Post> = postDao.getPostById(postId)
+    // CORREGIDO: Implementación actualizada para que coincida con la interfaz
+    override fun getPostByIdStream(postId: Int): Flow<Post?> = postDao.getPostById(postId)
 
     override suspend fun insertPost(post: Post) {
         postDao.insertPost(post)
@@ -34,4 +37,6 @@ class OfflinePostRepository(private val postDao: PostDao) : PostRepository {
     override suspend fun updatePost(post: Post) {
         postDao.updatePost(post)
     }
+
+    override fun searchPostsStream(query: String): Flow<List<Post>> = postDao.searchPosts(query)
 }

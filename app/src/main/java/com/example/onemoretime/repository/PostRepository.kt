@@ -13,7 +13,8 @@ class PostRepository {
                 title = "Mi reseña de Elden Ring: Una obra maestra",
                 content = "Después de 100 horas de juego, puedo decir que...",
                 comments = 45,
-                rating = 5.0f
+                rating = 5.0f,
+                score = 120 // <-- Campo añadido
             ),
             Post(
                 id = 2,
@@ -23,7 +24,8 @@ class PostRepository {
                 title = "Cyberpunk 2077 con el parche 2.0 es otro juego",
                 content = "La redención de CD Projekt Red es real. Night City se siente más viva que nunca.",
                 comments = 23,
-                rating = 4.5f
+                rating = 4.5f,
+                score = 85 // <-- Campo añadido
             ),
             Post(
                 id = 3,
@@ -33,7 +35,8 @@ class PostRepository {
                 title = "Enganchada a Stardew Valley otra vez",
                 content = "No importa cuántas veces lo juegue, siempre vuelvo a mi granja.",
                 comments = 78,
-                rating = 5.0f
+                rating = 5.0f,
+                score = 230 // <-- Campo añadido
             )
         )
     }

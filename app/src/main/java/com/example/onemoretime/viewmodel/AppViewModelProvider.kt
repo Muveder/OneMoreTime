@@ -17,7 +17,7 @@ object AppViewModelProvider {
         }
 
         initializer {
-            PostViewModel(oneMoreTimeApplication().container.postRepository)
+            HomeViewModel(oneMoreTimeApplication().container.postRepository)
         }
 
         initializer {
@@ -39,14 +39,24 @@ object AppViewModelProvider {
             LoginViewModel(oneMoreTimeApplication().container.usuarioRepository)
         }
 
-        // Modificado para inyectar los tres repositorios
+        // CORREGIDO: Añadida la inyección de usuarioRepository
         initializer {
             PostDetailViewModel(
                 this.createSavedStateHandle(),
                 oneMoreTimeApplication().container.postRepository,
                 oneMoreTimeApplication().container.voteRepository,
-                oneMoreTimeApplication().container.commentRepository
+                oneMoreTimeApplication().container.commentRepository,
+                oneMoreTimeApplication().container.commentVoteRepository,
+                oneMoreTimeApplication().container.usuarioRepository
             )
+        }
+        
+        initializer {
+            SearchViewModel(oneMoreTimeApplication().container.postRepository)
+        }
+
+        initializer {
+            SettingsViewModel(oneMoreTimeApplication().container.usuarioRepository)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.onemoretime.ui.screen
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,7 +8,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,11 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.rememberAsyncImagePainter
+import com.example.onemoretime.data.SessionManager
+import com.example.onemoretime.model.Usuario
 import com.example.onemoretime.viewmodel.AppViewModelProvider
 import com.example.onemoretime.viewmodel.ProfileViewModel
 import java.text.SimpleDateFormat
@@ -40,62 +51,68 @@ fun ProfileScreen(
         topBar = {
             TopAppBar(
                 title = { Text(usuario?.nombre ?: "Perfil", color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = darkPurple)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = darkPurple),
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navController.navigate("settings") }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Configuración", tint = Color.White)
+                    }
+                    IconButton(onClick = {
+                        SessionManager.logout()
+                        navController.navigate("login") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar Sesión", tint = Color.White)
+                    }
+                }
             )
         },
         bottomBar = {
-            BottomAppBar(containerColor = darkPurple) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-                    IconButton(onClick = { navController.navigate("home") { launchSingleTop = true } }) {
-                        Icon(Icons.Default.Home, contentDescription = "Home", tint = Color.White)
-                    }
-                    IconButton(onClick = { navController.navigate("explore") { launchSingleTop = true } }) {
-                        Icon(Icons.Default.Explore, contentDescription = "Explorar", tint = Color.White)
-                    }
-                    IconButton(onClick = { navController.navigate("create_post") { launchSingleTop = true } }) {
-                        Icon(Icons.Default.AddCircle, contentDescription = "Crear Post", tint = Color.White, modifier = Modifier.size(40.dp))
-                    }
-                    IconButton(onClick = { navController.navigate("profile") { launchSingleTop = true } }) {
-                        Icon(Icons.Default.Person, contentDescription = "Perfil", tint = lightPurple) // Color activo
-                    }
-                }
-            }
-        },
-        containerColor = lightPurple.copy(alpha = 0.1f)
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+            BottomNavBar(navController = navController, currentRoute = currentRoute)
+        }
     ) { paddingValues ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            // Cabecera del Perfil
-            item {
-                if (usuario != null) {
-                    ProfileHeader(usuario = usuario, postCount = posts.size)
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (usuario != null) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                item { 
+                    ProfileHeader(usuario = usuario, postCount = posts.size, onEditAvatar = { 
+                        navController.navigate("settings")
+                    })
+                }
+                item { Divider(color = darkPurple, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp)) }
+                item {
+                    Text(
+                        text = "Mis Reseñas",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                items(posts) { post ->
+                    PostCard(post = post, navController = navController)
                 }
             }
-
-            // Divisor
-            item {
-                Divider(color = darkPurple, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
-            }
-
-            // Título de la sección de posts
-            item {
-                Text(
-                    text = "Mis Reseñas",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            // Lista de posts del usuario
-            items(posts) {
-                post -> PostCard(post = post, navController = navController)
+        } else {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                Text("No se pudo cargar el perfil. Intenta iniciar sesión de nuevo.")
             }
         }
     }
 }
 
 @Composable
-fun ProfileHeader(usuario: com.example.onemoretime.model.Usuario, postCount: Int) {
+fun ProfileHeader(usuario: Usuario, postCount: Int, onEditAvatar: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -103,30 +120,47 @@ fun ProfileHeader(usuario: com.example.onemoretime.model.Usuario, postCount: Int
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Avatar
-        Image(
-            imageVector = Icons.Default.AccountCircle,
-            contentDescription = "Avatar",
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(lightPurple)
-        )
+        Box {
+            if (usuario.avatarUrl != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = Uri.parse(usuario.avatarUrl)),
+                    contentDescription = "Avatar",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(lightPurple),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Avatar por defecto",
+                    modifier = Modifier.size(80.dp),
+                    tint = lightPurple
+                )
+            }
+            IconButton(
+                onClick = onEditAvatar,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(24.dp)
+                    .background(Color.White, CircleShape)
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar avatar", tint = darkPurple, modifier = Modifier.size(16.dp))
+            }
+        }
 
-        // Nombre de usuario
         Text(usuario.nombre, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        
-        // Estadísticas
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
             Statistic(label = "Karma", value = usuario.karma.toString())
             Statistic(label = "Posts", value = postCount.toString())
         }
-        
-        // Fecha de registro ("Cake Day")
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Cake, contentDescription = "Día de tarta", tint = Color.Gray)
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = "Día de tarta: ${formatDate(usuario.fechaRegistro)}", color = Color.Gray)
+        usuario.cumpleanos?.let {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Cake, contentDescription = "Cumpleaños", tint = Color.Gray)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Cumpleaños: ${formatDate(it)}", color = Color.Gray)
+            }
         }
     }
 }
