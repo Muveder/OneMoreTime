@@ -1,0 +1,1 @@
+OneMoreTime es una app de reseñas de videojuegos, en la cual el usuario puede registrarse y comenzar a crear sus propias reseñas y valoración de videojuegos, así como debatir la valoración y reseñas de otros usuarios.
