@@ -20,8 +20,9 @@ object AppViewModelProvider {
             HomeViewModel(oneMoreTimeApplication().container.postRepository)
         }
 
+        // CORREGIDO: Ahora usa gameRepository para ExploreViewModel
         initializer {
-            ExploreViewModel(oneMoreTimeApplication().container.postRepository)
+            ExploreViewModel(oneMoreTimeApplication().container.gameRepository)
         }
 
         initializer {
@@ -39,7 +40,6 @@ object AppViewModelProvider {
             LoginViewModel(oneMoreTimeApplication().container.usuarioRepository)
         }
 
-        // CORREGIDO: Añadida la inyección de usuarioRepository
         initializer {
             PostDetailViewModel(
                 this.createSavedStateHandle(),

@@ -2,48 +2,69 @@ package com.example.onemoretime.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.onemoretime.data.PostRepository
-import com.example.onemoretime.model.Post
+import com.example.onemoretime.data.GameRepository
+import com.example.onemoretime.data.remote.GameDto
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-enum class ExploreTab { NEW, TOP }
-
-// El estado ahora incluye ambas listas y la pestaña seleccionada
+/**
+ * Estado de la UI para la pantalla Explore.
+ */
 data class ExploreUiState(
-    val newPosts: List<Post> = emptyList(),
-    val topRatedPosts: List<Post> = emptyList(),
-    val selectedTab: ExploreTab = ExploreTab.TOP
+    val games: List<GameDto> = emptyList(),
+    val currentPage: Int = 1,
+    val isLoading: Boolean = true,
+    val isLoadingMore: Boolean = false,
+    val error: String? = null
 )
 
-class ExploreViewModel(postRepository: PostRepository) : ViewModel() {
+class ExploreViewModel(private val gameRepository: GameRepository) : ViewModel() {
 
-    private val _selectedTab = MutableStateFlow(ExploreTab.TOP)
+    private val _uiState = MutableStateFlow(ExploreUiState())
+    val uiState: StateFlow<ExploreUiState> = _uiState.asStateFlow()
 
-    // El estado de la UI combina ambas listas y la pestaña seleccionada
-    val uiState: StateFlow<ExploreUiState> = combine(
-        postRepository.getAllPostsStream(), // Para la pestaña "Nuevos"
-        postRepository.getTopRatedPostsStream(), // Para la pestaña "Top"
-        _selectedTab
-    ) { newPosts, topPosts, tab ->
-        ExploreUiState(
-            newPosts = newPosts,
-            topRatedPosts = topPosts,
-            selectedTab = tab
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = ExploreUiState()
-    )
+    init {
+        loadMoreGames(isInitialLoad = true)
+    }
 
-    /**
-     * Se llama cuando el usuario pulsa una de las pestañas.
-     */
-    fun selectTab(tab: ExploreTab) {
-        _selectedTab.value = tab
+    fun loadMoreGames(isInitialLoad: Boolean = false) {
+        // CORRECCIÓN: Se elimina la guarda que impedía la carga inicial.
+        // La lógica en la UI ya previene cargas múltiples.
+
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isLoading = isInitialLoad, isLoadingMore = !isInitialLoad, error = null)
+            }
+
+            val result = try {
+                Result.success(gameRepository.getGames(page = _uiState.value.currentPage))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Result.failure(e)
+            }
+
+            _uiState.update { currentState ->
+                result.fold(
+                    onSuccess = { newGames ->
+                        currentState.copy(
+                            games = currentState.games + newGames,
+                            currentPage = currentState.currentPage + 1,
+                            isLoading = false,
+                            isLoadingMore = false
+                        )
+                    },
+                    onFailure = { error ->
+                        currentState.copy(
+                            error = error.message,
+                            isLoading = false,
+                            isLoadingMore = false
+                        )
+                    }
+                )
+            }
+        }
     }
 }

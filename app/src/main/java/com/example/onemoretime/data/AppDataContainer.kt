@@ -1,18 +1,31 @@
 package com.example.onemoretime.data
 
 import android.content.Context
+import com.example.onemoretime.data.remote.RawgRetrofitInstance
+import com.example.onemoretime.data.remote.RetrofitInstance
 
+/**
+ * Interfaz del contenedor de dependencias que define todos los repositorios de la app.
+ */
 interface AppContainer {
     val postRepository: PostRepository
     val usuarioRepository: UsuarioRepository
     val voteRepository: VoteRepository
     val commentRepository: CommentRepository
-    val commentVoteRepository: CommentVoteRepository // <-- Nuevo repositorio
+    val commentVoteRepository: CommentVoteRepository
+    val gameRepository: GameRepository // <-- NUEVO
 }
 
+/**
+ * [AppContainer] implementation that provides instances of the repositories.
+ */
 class AppDataContainer(private val context: Context) : AppContainer {
+    
     override val postRepository: PostRepository by lazy {
-        OfflinePostRepository(AppDatabase.getDatabase(context).postDao())
+        DefaultPostRepository(
+            AppDatabase.getDatabase(context).postDao(),
+            RetrofitInstance.api 
+        )
     }
 
     override val usuarioRepository: UsuarioRepository by lazy {
@@ -27,8 +40,14 @@ class AppDataContainer(private val context: Context) : AppContainer {
         OfflineCommentRepository(AppDatabase.getDatabase(context).commentDao())
     }
 
-    // Implementación del nuevo repositorio
     override val commentVoteRepository: CommentVoteRepository by lazy {
         OfflineCommentVoteRepository(AppDatabase.getDatabase(context).commentVoteDao())
+    }
+
+    /**
+     * Implementación para el nuevo [gameRepository].
+     */
+    override val gameRepository: GameRepository by lazy {
+        NetworkGameRepository(RawgRetrofitInstance.api)
     }
 }

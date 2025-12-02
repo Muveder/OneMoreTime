@@ -22,8 +22,15 @@ interface PostDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPost(post: Post)
+    
+    // NUEVO: Método para insertar una lista de posts
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(posts: List<Post>)
 
-    // CORREGIDO: La función ahora devuelve un Flow<Post?> para manejar casos donde el post no existe.
+    // NUEVO: Método para borrar todos los posts
+    @Query("DELETE FROM posts")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM posts WHERE id = :postId")
     fun getPostById(postId: Int): Flow<Post?>
 

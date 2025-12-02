@@ -11,8 +11,6 @@ import com.example.onemoretime.data.SessionManager
 import com.example.onemoretime.model.Post
 import com.example.onemoretime.model.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -21,7 +19,6 @@ class CreatePostViewModel(private val postRepository: PostRepository) : ViewMode
     var postUiState by mutableStateOf(PostUiState())
         private set
 
-    // Estado para mantener al usuario actual de forma reactiva y segura
     private val _currentUser = MutableStateFlow<Usuario?>(null)
 
     init {
@@ -41,14 +38,14 @@ class CreatePostViewModel(private val postRepository: PostRepository) : ViewMode
     }
 
     fun savePost(): Boolean {
-        // Usamos el estado reactivo que siempre está actualizado
         val currentUser = _currentUser.value
         if (!validateInput() || currentUser == null) {
             return false
         }
 
         viewModelScope.launch {
-            postRepository.insertPost(postUiState.toPost(authorName = currentUser.nombre))
+            // CORREGIDO: Llama a la nueva función que se conecta al backend
+            postRepository.createPost(postUiState.toPost(authorName = currentUser.nombre))
         }
         return true
     }
