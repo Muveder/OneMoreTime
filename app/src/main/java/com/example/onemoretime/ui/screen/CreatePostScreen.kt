@@ -31,8 +31,10 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.onemoretime.data.SessionManager
 import com.example.onemoretime.viewmodel.AppViewModelProvider
 import com.example.onemoretime.viewmodel.CreatePostViewModel
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
@@ -42,8 +44,11 @@ fun CreatePostScreen(
     navController: NavController,
     createPostViewModel: CreatePostViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val uiState = createPostViewModel.postUiState
+    val uiState by createPostViewModel.uiState.collectAsState()
+    // Obtenemos el usuario actual del SessionManager
+    val currentUser by SessionManager.currentUser.collectAsState(initial = null)
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -87,8 +92,11 @@ fun CreatePostScreen(
                 },
                 actions = {
                     Button(onClick = {
-                        if (createPostViewModel.savePost()) {
-                            navController.popBackStack()
+                        coroutineScope.launch {
+                            // CORRECCIÓN: Le pasamos el uiState y el currentUser a la función
+                            if (createPostViewModel.savePost(uiState, currentUser)) {
+                                navController.popBackStack()
+                            }
                         }
                     }) {
                         Text("Publicar")
@@ -113,7 +121,6 @@ fun CreatePostScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- Nuevo cuadro de reseña --- 
             Column(
                 modifier = Modifier
                     .weight(1f)

@@ -1,56 +1,41 @@
 package com.example.onemoretime.viewmodel
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.onemoretime.data.PostRepository
-import com.example.onemoretime.data.SessionManager
 import com.example.onemoretime.model.Post
 import com.example.onemoretime.model.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class CreatePostViewModel(private val postRepository: PostRepository) : ViewModel() {
 
-    var postUiState by mutableStateOf(PostUiState())
-        private set
-
-    private val _currentUser = MutableStateFlow<Usuario?>(null)
-
-    init {
-        viewModelScope.launch {
-            SessionManager.currentUser.collect { user ->
-                _currentUser.value = user
-            }
-        }
-    }
+    private val _uiState = MutableStateFlow(PostUiState())
+    val uiState: StateFlow<PostUiState> = _uiState.asStateFlow()
 
     fun updateUiState(newPostUiState: PostUiState) {
-        postUiState = newPostUiState.copy()
+        _uiState.update { newPostUiState.copy() }
     }
 
     fun onImageSelected(uri: Uri?) {
-        postUiState = postUiState.copy(imageUrl = uri?.toString())
+        _uiState.update { it.copy(imageUrl = uri?.toString()) }
     }
 
-    fun savePost(): Boolean {
-        val currentUser = _currentUser.value
-        if (!validateInput() || currentUser == null) {
+    // ARREGLO DEFINITIVO: La función ahora recibe TODO lo que necesita.
+    // No depende de estados internos ocultos. Es pura y predecible.
+    suspend fun savePost(uiState: PostUiState, currentUser: Usuario?): Boolean {
+        if (!validateInput(uiState) || currentUser == null) {
             return false
         }
 
-        viewModelScope.launch {
-            // CORREGIDO: Llama a la nueva función que se conecta al backend
-            postRepository.createPost(postUiState.toPost(authorName = currentUser.nombre))
-        }
+        postRepository.createPost(uiState.toPost(authorName = currentUser.nombre))
         return true
     }
 
-    private fun validateInput(uiState: PostUiState = postUiState): Boolean {
+    // La validación también es ahora una función pura que recibe el estado.
+    private fun validateInput(uiState: PostUiState): Boolean {
         return with(uiState) {
             title.isNotBlank() && community.isNotBlank()
         }

@@ -7,12 +7,17 @@ import android.content.Context
 import android.os.Build
 import com.example.onemoretime.data.AppContainer
 import com.example.onemoretime.data.AppDataContainer
+import com.jakewharton.threetenabp.AndroidThreeTen   // <-- IMPORTANTE
 
 class OneMoreTimeApplication : Application() {
     lateinit var container: AppContainer
 
     override fun onCreate() {
         super.onCreate()
+
+        // 🔥 Inicializar ThreeTenABP
+        AndroidThreeTen.init(this)
+
         container = AppDataContainer(this)
         createNotificationChannel()
     }
@@ -25,7 +30,6 @@ class OneMoreTimeApplication : Application() {
             val channel = NotificationChannel("like_channel", name, importance).apply {
                 description = descriptionText
             }
-            // Registramos el canal en el sistema
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
